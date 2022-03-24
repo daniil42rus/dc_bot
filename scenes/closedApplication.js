@@ -87,8 +87,8 @@ closedIdApplication.on("text", async (ctx) => {
             findApplicationID.closed.hours = hours;
             findApplicationID.closed.minutes = minutes;
 
-            await ctx.reply(`Вы закрыли заявку ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `, Markup.removeKeyboard());
-            await ctx.reply(`Заявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`, Markup.removeKeyboard());
+            await ctx.reply(`Вы закрыли заявку ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `);
+            await ctx.reply(`Заявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`,Markup.removeKeyboard());
 
             await botMessage.sendMessage(findApplicationID.customer.id, `Вашу заявку с ID ${findApplicationID.id} закрыл ${executorID.name} \nЗаявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`,
                 { disable_web_page_preview: true });

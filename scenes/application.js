@@ -1,7 +1,8 @@
 const { Markup, Composer, Scenes } = require('telegraf')
 const TelegramBot = require('node-telegram-bot-api');
-require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
+require('dotenv').config();
+
 const fs = require('fs');
 const { Console } = require('console');
 
@@ -139,7 +140,6 @@ problemsDetails.hears('Регистры', async (ctx) => {
     }
 })
 
-
 problemsDetails.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.problems = ctx.message.text
@@ -165,6 +165,7 @@ urgency.on("text", async (ctx) => {
         console.error(e)
     }
 })
+
 
 const roomNumber = new Composer()
 roomNumber.on("text", async (ctx) => {
@@ -192,6 +193,13 @@ conditionStep.on("text", async (ctx) => {
         let hours = currentDate.getHours()
         let minutes = currentDate.getMinutes()
 
+        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+
+        let readFileParse = JSON.parse(readFile)
+        let nubberID = parseInt(readFileParse[readFileParse.length - 1].id + 1)
+
+        // console.log(readFileParse[readFileParse.length - 1].id)
+
         let answer = (
             `
             ${wizardData.title} 
@@ -200,7 +208,7 @@ conditionStep.on("text", async (ctx) => {
       Отправитель:  ${wizardData.firstName}      
       В чем проблема:   ${wizardData.problems}      
       Описание:   ${wizardData.problemsDetails} 
-      id заявки:  ${wizardData.id}       
+      id заявки:  ${nubberID}       
         `);
 
         let answerAdmin = (
@@ -208,9 +216,8 @@ conditionStep.on("text", async (ctx) => {
             tg://user?id=${wizardData.userId}`
         );
 
-
         answerJSON = {
-            'id': wizardData.id,
+            'id': nubberID,
 
             'open': true,
 
@@ -219,12 +226,13 @@ conditionStep.on("text", async (ctx) => {
                 'roomNumber': wizardData.roomNumber,
                 'problems': wizardData.problems,
                 'problemsDetails': wizardData.problemsDetails,
+                'urgency': wizardData.urgency,
             },
 
             'customer': {
                 'firstName': wizardData.firstName,
                 'id': wizardData.userId,
-                'nickname': wizardData.userName,
+                'nickName': wizardData.userName,
             },
 
             'executor': {
@@ -250,16 +258,12 @@ conditionStep.on("text", async (ctx) => {
             },
         };
 
-
-
         await botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin, {
             disable_web_page_preview: true
         });
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
         let all = readFile.substring(0, readFile.length - 1) + ',' + JSON.stringify(answerJSON) + ']';
         fs.writeFileSync('./db/applications.json', all);
-
 
         await ctx.reply(answer, {
             disable_web_page_preview: true

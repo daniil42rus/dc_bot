@@ -41,7 +41,7 @@ idApplication.on("text", async (ctx) => {
     ctx.wizard.state.data.text = ctx.message.text
 
     try {
-        await ctx.replyWithHTML("Введите ID", Markup.removeKeyboard())
+        await ctx.replyWithHTML("Введите ID")
         return ctx.wizard.next()
     } catch (e) {
         console.error(e)
@@ -67,12 +67,12 @@ addIdApplication.on("text", async (ctx) => {
         let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == wizardData.userId)
 
         if (findApplicationID == undefined) {
-            await ctx.reply("Заявка не найдена", Markup.removeKeyboard());
+            await ctx.reply("Заявка не найдена");
             return ctx.scene.leave()
         }
 
         if (findApplicationID.executor.id == wizardData.userId) {
-            await ctx.reply("Это уже ваша заявка", Markup.removeKeyboard());
+            await ctx.reply("Это уже ваша заявка");
             return ctx.scene.leave()
         }
 
@@ -86,7 +86,7 @@ addIdApplication.on("text", async (ctx) => {
             findApplicationID.executor.id = wizardData.userId;
             findApplicationID.executor.nickName = wizardData.userName;
 
-            await ctx.reply(`Вам добавленна заявка ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `, Markup.removeKeyboard());
+            await ctx.reply(`Вам добавленна заявка ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `,Markup.removeKeyboard());
             await botMessage.sendMessage(findApplicationID.customer.id, `Вашу заявку принял ${executorID.name} \n Связь с исполнителем \n t.me/${findApplicationID.executor.nickName}`,
                 { disable_web_page_preview: true });
             readFileStringify = JSON.stringify(readFileParse)
