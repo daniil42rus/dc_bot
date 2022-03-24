@@ -2,12 +2,12 @@ const { Markup, Composer, Scenes } = require('telegraf')
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
-// const yesUndefined = name => typeof name === 'undefined' ? '' : name;
+const fs = require('fs');
+const { Console } = require('console');
 
 const department = new Composer()
 department.on("text", async (ctx) => {
     try {
-        console.log(ctx.from)
         console.log(ctx.chat)
 
         ctx.wizard.state.data = {}
@@ -170,7 +170,7 @@ const roomNumber = new Composer()
 roomNumber.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.urgency = ctx.message.text
-        await ctx.replyWithHTML("Какаой у вас кабинет? ")
+        await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.removeKeyboard())
         return ctx.wizard.next()
     } catch (e) {
         console.error(e)
@@ -182,6 +182,16 @@ conditionStep.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.roomNumber = ctx.message.text
         const wizardData = ctx.wizard.state.data
+
+        let applicationID = Math.floor(wizardData.id / 10)
+
+        let currentDate = new Date();
+        let dd = currentDate.getDate();
+        let mm = currentDate.getMonth() + 1;
+        let yyyy = currentDate.getFullYear();
+        let hours = currentDate.getHours()
+        let minutes = currentDate.getMinutes()
+
         let answer = (
             `
             ${wizardData.title} 
@@ -189,42 +199,79 @@ conditionStep.on("text", async (ctx) => {
       Срочность:  ${wizardData.urgency}       
       Отправитель:  ${wizardData.firstName}      
       В чем проблема:   ${wizardData.problems}      
-      Описание:   ${wizardData.problemsDetails}      
+      Описание:   ${wizardData.problemsDetails} 
       id заявки:  ${wizardData.id}       
-        `);      
+        `);
 
         let answerAdmin = (
             `t.me/${wizardData.userName}
             tg://user?id=${wizardData.userId}`
         );
 
-        let DC = (
-            `Дмитрий
-            t.me/@DEFnesses`
-        );
 
-        await ctx.replyWithHTML('Заявка отправлена в отдел ИТ', Markup.keyboard([
-            ['Подать новую заявку'],]
-        ).oneTime().resize())
+        answerJSON = {
+            'id': wizardData.id,
 
-        await ctx.replyWithHTML(answer, {
+            'open': true,
+
+            'application': {
+                'department': wizardData.title,
+                'roomNumber': wizardData.roomNumber,
+                'problems': wizardData.problems,
+                'problemsDetails': wizardData.problemsDetails,
+            },
+
+            'customer': {
+                'firstName': wizardData.firstName,
+                'id': wizardData.userId,
+                'nickname': wizardData.userName,
+            },
+
+            'executor': {
+                'name': false,
+                'id': false,
+                'nickName': false,
+            },
+
+            'closed': {
+                'day': false,
+                'month': false,
+                'year': false,
+                'hours': false,
+                'minutes': false,
+            },
+
+            'applicationDate': {
+                'day': dd,
+                'month': mm,
+                'year': yyyy,
+                'hours': hours,
+                'minutes': minutes,
+            },
+        };
+
+
+
+        await botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin, {
             disable_web_page_preview: true
         });
 
-        if (wizardData.title === 'Диагностический центр') {
-            await ctx.replyWithHTML(`Вашу заявку принял: \n ${DC}`);
-            botMessage.sendMessage(347867666, answer + answerAdmin)
-        }
+        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        let all = readFile.substring(0, readFile.length - 1) + ',' + JSON.stringify(answerJSON) + ']';
+        fs.writeFileSync('./db/applications.json', all);
 
-        botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin)
+
+        await ctx.reply(answer, {
+            disable_web_page_preview: true
+        });
+
         return ctx.scene.leave()
     } catch (e) {
         console.error(e)
     }
-    return i;
+
+
 })
-
-
 
 const applicationScene = new Scenes.WizardScene('applicationWizard', department, problems, problemsDetails, urgency, roomNumber, conditionStep)
 module.exports = applicationScene
