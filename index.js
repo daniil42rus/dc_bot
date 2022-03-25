@@ -3,7 +3,6 @@ require('dotenv').config();
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const fs = require('fs');
 
-
 const applicationScene = require("./scenes/application.js")
 const takeApplicationScene = require("./scenes/takeApplication.js")
 const closedApplicationScene = require("./scenes/closedApplication.js")
@@ -11,6 +10,8 @@ const myOpenApplicationScene = require("./scenes/myOpenApplication.js")
 const myClosedMonthApplicationScene = require("./scenes/myClosedMonthApplication.js")
 const allOpenApplicationScene = require("./scenes/allOpenApplication.js")
 const sendApplicationScene = require("./scenes/sendApplication.js")
+const sendStatisticsScene = require("./scenes/statistics.js")
+const personOpenApplicationScene = require("./scenes/personOpenApplication.js")
 
 const stage = new Scenes.Stage(
     [
@@ -20,15 +21,13 @@ const stage = new Scenes.Stage(
         myOpenApplicationScene,
         myClosedMonthApplicationScene,
         allOpenApplicationScene,
-        sendApplicationScene
+        sendApplicationScene,
+        sendStatisticsScene,
+        personOpenApplicationScene
     ])
-
-
-
 
 bot.use(session())
 bot.use(stage.middleware());
-
 
 bot.command('admin', (ctx) => {
 
@@ -39,7 +38,7 @@ bot.command('admin', (ctx) => {
 
     console.log(executorID)
     if (executorID === undefined) {
-        ctx.reply("У вас нет прав для просмотра")
+        ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
     } else {
         ctx.replyWithHTML("Выберите из меню нужное действие", Markup.keyboard([
             ['Взять заявку по ID', 'Закрыть заявку по ID'],
@@ -47,7 +46,6 @@ bot.command('admin', (ctx) => {
             ['Открытые заявки'],
             ['Изменить исполнителя'],
         ]).oneTime().resize())
-
     }
 })
 
@@ -75,11 +73,23 @@ bot.hears("Изменить исполнителя", (ctx) => {
     ctx.scene.enter('sendApplicationWizard')
 })
 
+bot.command('statistic', (ctx) => {
+    if (ctx.from.id == process.env.stan || ctx.from.id == process.env.dan) {
+        ctx.scene.enter('statisticsWizard')
+    } else {
+        ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
+    }
 
+})
 
+bot.command('person', (ctx) => {
+    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2) {
 
-
-
+        ctx.scene.enter('personOpenApplicationWizard')
+    } else {
+        ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
+    }
+})
 
 bot.command('new_application', (ctx) => {
     if (ctx.chat.id != process.env.applicationChat) {
