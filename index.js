@@ -12,6 +12,8 @@ const allOpenApplicationScene = require("./scenes/allOpenApplication.js")
 const sendApplicationScene = require("./scenes/sendApplication.js")
 const sendStatisticsScene = require("./scenes/statistics.js")
 const personOpenApplicationScene = require("./scenes/personOpenApplication.js")
+const messageAllScene = require("./scenes/massageAll.js")
+const customerOpenApplicationScene = require("./scenes/customerOpenApplication.js")
 
 const stage = new Scenes.Stage(
     [
@@ -23,7 +25,9 @@ const stage = new Scenes.Stage(
         allOpenApplicationScene,
         sendApplicationScene,
         sendStatisticsScene,
-        personOpenApplicationScene
+        personOpenApplicationScene,
+        messageAllScene,
+        customerOpenApplicationScene
     ])
 
 bot.use(session())
@@ -43,8 +47,8 @@ bot.command('admin', (ctx) => {
         ctx.replyWithHTML("Выберите из меню нужное действие", Markup.keyboard([
             ['Взять заявку по ID', 'Закрыть заявку по ID'],
             ['Мои открытые заявки', 'Мои закрытые заявки за этот месяц'],
-            ['Открытые заявки'],
-            ['Изменить исполнителя'],
+            ['Открытые заявки', 'Изменить исполнителя'],
+            ['Отправить сообщение'],
         ]).oneTime().resize())
     }
 })
@@ -73,8 +77,12 @@ bot.hears("Изменить исполнителя", (ctx) => {
     ctx.scene.enter('sendApplicationWizard')
 })
 
+bot.hears("Отправить сообщение", (ctx) => {
+    ctx.scene.enter('messageAllWizard')
+})
+
 bot.command('statistic', (ctx) => {
-    if (ctx.from.id == process.env.stan || ctx.from.id == process.env.dan) {
+    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2) {
         ctx.scene.enter('statisticsWizard')
     } else {
         ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
@@ -96,6 +104,11 @@ bot.command('new_application', (ctx) => {
         ctx.scene.enter('applicationWizard')
     }
 })
+
+bot.command('open_application', (ctx) => {
+    ctx.scene.enter('customerOpenApplicationWizard')
+})
+
 
 bot.on('message', (ctx) => {
     if (ctx.chat.id != process.env.applicationChat) {

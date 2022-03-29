@@ -26,6 +26,7 @@ department.on("text", async (ctx) => {
             ['3 поликлиника', '4 поликлиника'],
             ['10 поликлиника', 'Женская консультация'],
             ['ТП', 'ЦМР'],
+            ['Отмена заявки'],
         ]).oneTime().resize())
         return ctx.wizard.next()
     } catch (e) {
@@ -34,6 +35,16 @@ department.on("text", async (ctx) => {
 })
 
 const problems = new Composer()
+problems.hears('Отмена заявки', async (ctx) => {
+    try {
+        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+        return ctx.scene.leave()
+    } catch (e) {
+        console.error(e)
+    }
+
+})
+
 problems.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.title = ctx.message.text
@@ -42,7 +53,7 @@ problems.on("text", async (ctx) => {
                 ['Арена', 'Принтер'],
                 ['1С', 'Компьютер'],
                 ['ФСС', 'Регистры'],
-
+                ['Отмена заявки'],
             ]).oneTime().resize())
         return ctx.wizard.next()
     } catch (e) {
@@ -50,8 +61,10 @@ problems.on("text", async (ctx) => {
     }
 })
 
-const problemsDetails = new Composer()
 
+
+
+const problemsDetails = new Composer()
 let problemsDetailsText = "Немного подробнее? Опишите или выберите из меню";
 
 problemsDetails.hears('Арена', async (ctx) => {
@@ -62,6 +75,7 @@ problemsDetails.hears('Арена', async (ctx) => {
             ['Зависла', 'Нет шаблона'],
             ['Создать шаблон', 'Ошибка на экране'],
             ['Не печатает'],
+            ['Отмена заявки'],
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -76,6 +90,8 @@ problemsDetails.hears('Принтер', async (ctx) => {
         await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
             ['Замена катриджа', 'Не печатает'],
             ['Замятие бумаги', 'Высыпался тонер'],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -90,6 +106,8 @@ problemsDetails.hears('1С', async (ctx) => {
         await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
             ['Не запускается ', 'Не работает '],
             ['Завис', 'Не печатает'],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -106,6 +124,8 @@ problemsDetails.hears('Компьютер', async (ctx) => {
             ['Завис', 'Нет интернета'],
             ['Не работает монитор', 'Не работает клавиатура/мышь'],
             ['Не работает программа', 'Установить новое ПО'],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -119,6 +139,8 @@ problemsDetails.hears('ФСС', async (ctx) => {
         ctx.wizard.state.data.problems = ctx.message.text
         await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
             ['Не отправляет  ', 'Не принимает  '],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -132,9 +154,20 @@ problemsDetails.hears('Регистры', async (ctx) => {
         ctx.wizard.state.data.problems = ctx.message.text
         await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
             ['Не открываются  ', 'Не корректный логин/пароль  '],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+problemsDetails.hears('Отмена заявки', async (ctx) => {
+    try {
+        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+        return ctx.scene.leave()
     } catch (e) {
         console.error(e)
     }
@@ -143,20 +176,38 @@ problemsDetails.hears('Регистры', async (ctx) => {
 problemsDetails.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.problems = ctx.message.text
-        await ctx.replyWithHTML("Немного подробнее?", Markup.removeKeyboard())
+        await ctx.replyWithHTML("Немного подробнее?", Markup.keyboard([
+            ['Отмена заявки'],
+        ]
+        ).oneTime().resize())
         return ctx.wizard.next()
     } catch (e) {
         console.error(e)
     }
 })
 
+
+
+
+
 const urgency = new Composer()
+urgency.hears('Отмена заявки', async (ctx) => {
+    try {
+        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+        return ctx.scene.leave()
+    } catch (e) {
+        console.error(e)
+    }
+})
+
 urgency.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.problemsDetails = ctx.message.text
         await ctx.replyWithHTML("Укажите сросночть заявки", Markup.keyboard([
             ['Срочно (1-2 часа)', 'В течении дня'],
             ['В течении 2х-3х дней', 'В течении недели'],
+            ['Отмена заявки'],
+
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
@@ -167,18 +218,43 @@ urgency.on("text", async (ctx) => {
 })
 
 
+
+
 const roomNumber = new Composer()
+roomNumber.hears('Отмена заявки', async (ctx) => {
+    try {
+        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+        return ctx.scene.leave()
+    } catch (e) {
+        console.error(e)
+    }
+})
 roomNumber.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.urgency = ctx.message.text
-        await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.removeKeyboard())
+        await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.keyboard([
+            ['Отмена заявки'],
+        ]
+        ).oneTime().resize())
         return ctx.wizard.next()
     } catch (e) {
         console.error(e)
     }
 })
 
+
+
 const conditionStep = new Composer()
+conditionStep.hears('Отмена заявки', async (ctx) => {
+    try {
+        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+        return ctx.scene.leave()
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+
 conditionStep.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.roomNumber = ctx.message.text
@@ -258,12 +334,34 @@ conditionStep.on("text", async (ctx) => {
             },
         };
 
+
+
+
         await botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin, {
             disable_web_page_preview: true
         });
 
         let all = readFile.substring(0, readFile.length - 1) + ',' + JSON.stringify(answerJSON) + ']';
         fs.writeFileSync('./db/applications.json', all);
+
+
+        let readCustomer = fs.readFileSync('./db/customer.json', 'utf-8')
+        let readCustomerParse = JSON.parse(readCustomer)
+
+        let findCustomer = readCustomerParse.find(readCustomerParse => readCustomerParse.customer.id == wizardData.userId)
+
+        if (findCustomer == undefined) {
+
+            let customer = {
+                'customer': {
+                    'firstName': wizardData.firstName,
+                    'id': wizardData.userId,
+                    'nickName': wizardData.userName,
+                }
+            }
+            let newCustomer = readCustomer.substring(0, readCustomer.length - 1) + ',' + JSON.stringify(customer) + ']';
+            fs.writeFileSync('./db/customer.json', newCustomer);
+        }
 
         await ctx.reply(answer, {
             disable_web_page_preview: true
