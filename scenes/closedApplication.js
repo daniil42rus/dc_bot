@@ -86,6 +86,7 @@ closedIdApplication.on("text", async (ctx) => {
             findApplicationID.closed.year = yyyy;
             findApplicationID.closed.hours = hours;
             findApplicationID.closed.minutes = minutes;
+            findApplicationID.closed.date = currentDate.toISOString()
 
             await ctx.reply(`Вы закрыли заявку ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `);
             await ctx.reply(`Заявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`,Markup.removeKeyboard());
@@ -95,6 +96,7 @@ closedIdApplication.on("text", async (ctx) => {
 
             readFileStringify = JSON.stringify(readFileParse)
             fs.writeFileSync('./db/applications.json', readFileStringify)
+
             return ctx.scene.leave()
         }
 

@@ -323,6 +323,8 @@ conditionStep.on("text", async (ctx) => {
                 'year': false,
                 'hours': false,
                 'minutes': false,
+                'date': false,
+
             },
 
             'applicationDate': {
@@ -331,6 +333,7 @@ conditionStep.on("text", async (ctx) => {
                 'year': yyyy,
                 'hours': hours,
                 'minutes': minutes,
+                'date': currentDate.toISOString(),
             },
         };
 
@@ -363,9 +366,11 @@ conditionStep.on("text", async (ctx) => {
             fs.writeFileSync('./db/customer.json', newCustomer);
         }
 
-        await ctx.reply(answer, {
+        await ctx.reply(answer,Markup.removeKeyboard(),  {
             disable_web_page_preview: true
         });
+
+
 
         return ctx.scene.leave()
     } catch (e) {
