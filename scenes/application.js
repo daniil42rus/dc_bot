@@ -9,7 +9,9 @@ const { Console } = require('console');
 const department = new Composer()
 department.on("text", async (ctx) => {
     try {
-        console.log(ctx.chat)
+        let date = new Date
+
+        console.log(ctx.chat, date.toLocaleString())
 
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
@@ -48,6 +50,31 @@ problems.hears('Отмена заявки', async (ctx) => {
 problems.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.title = ctx.message.text
+
+        switch (ctx.message.text) {
+            case 'Диагностический центр':
+                break
+            case '1 поликлиника':
+                break
+            case '2 поликлиника':
+                break
+            case '3 поликлиника':
+                break
+            case '4 поликлиника':
+                break
+            case '10 поликлиника':
+                break
+            case 'Женская консультация':
+                break
+            case 'ТП':
+                break
+            case 'ЦМР':
+                break
+            default:
+                await ctx.replyWithHTML("Нет такого подразделения", Markup.removeKeyboard())
+                return ctx.scene.leave()
+        }
+
         await ctx.replyWithHTML("В чем проблема? Опишите или выберите из меню"
             , Markup.keyboard([
                 ['Арена', 'Принтер'],
@@ -366,7 +393,7 @@ conditionStep.on("text", async (ctx) => {
             fs.writeFileSync('./db/customer.json', newCustomer);
         }
 
-        await ctx.reply(answer,Markup.removeKeyboard(),  {
+        await ctx.reply(answer, Markup.removeKeyboard(), {
             disable_web_page_preview: true
         });
 

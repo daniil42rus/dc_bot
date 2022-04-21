@@ -59,11 +59,10 @@ async function getApplications() {
     return applications
 }
 
+
 async function getExecutors() {
     let response = await fetch('db/executors.json');
     let executors = await response.json();
-
-
     return executors
 }
 
@@ -153,8 +152,10 @@ function createItems(element) {
 
     if (element.application.urgency === 'Срочно (1-2 часа)') {
         let date = new Date(element.applicationDate.date)
-        let deadline = date.getHours() + 2
-        if (date.getHours() < deadline) {
+        let deadline = new Date(date);
+        let nowDate = new Date()
+        deadline.setHours(date.getHours() + 2)
+        if (nowDate > deadline) {
             item.classList.add('deadline')
         }
     }
@@ -206,7 +207,7 @@ function createItems(element) {
     problems.textContent = element.application.problems
     problemsDetails.textContent = element.application.problemsDetails
     customer.textContent = element.customer.firstName
-    element.executor.name ? executor.textContent = element.executor.name : executor.textContent = 'Не назначем'
+    element.executor.name ? executor.textContent = element.executor.name : executor.textContent = 'Не назначен'
 
 
     let CreateApplicationDate = new Date(element.applicationDate.date)
@@ -237,12 +238,12 @@ function createItems(element) {
 }
 
 async function createTable() {
-    let applications = await getApplications()
     let list = createList()
     let div = document.createElement('div')
     let h1 = document.createElement('h1')
     let col = document.createElement('span')
 
+    let applications = await getApplications()
 
     div.classList.add('table__title')
 
@@ -337,17 +338,17 @@ async function createTable() {
     div.append(h1)
     div.append(col)
 
-
-
-
 }
+
 
 
 
 document.addEventListener('DOMContentLoaded', async () => {
     createMenu()
     // await createExecutorNav()
+
     await createTable()
+
     // console.log(window.location.origin + window.location.search)
     // console.log(window.location.search)
     // console.log(pageParams.get("page"))

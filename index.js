@@ -40,7 +40,7 @@ bot.command('admin', (ctx) => {
 
     let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
 
-    console.log(executorID)
+    // console.log(executorID)
     if (executorID === undefined) {
         ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
     } else {
