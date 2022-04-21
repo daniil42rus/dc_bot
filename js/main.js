@@ -243,6 +243,8 @@ async function createTable() {
     let h1 = document.createElement('h1')
     let col = document.createElement('span')
 
+
+
     let applications = await getApplications()
 
     div.classList.add('table__title')
@@ -251,22 +253,22 @@ async function createTable() {
     container.append(div)
     container.append(list)
 
-    function getTable() {
-        applications.forEach(element => {
+    function getTable(app) {
+        app.forEach(element => {
             if (element.open && pageParams.get("page") == 'Открытые заявки') {
                 let item = createItems(element)
                 list.append(item)
             }
         });
 
-        applications.forEach(element => {
+        app.forEach(element => {
             if (!element.open && pageParams.get("page") == 'Закрытые заявки') {
                 let item = createItems(element)
                 list.append(item)
             }
         });
 
-        applications.forEach(element => {
+        app.forEach(element => {
             if (pageParams.get("page") == 'Все заявки') {
                 let item = createItems(element)
                 list.append(item)
@@ -274,8 +276,14 @@ async function createTable() {
         });
 
     }
-    getTable()
+    getTable(applications)
 
+
+    setInterval(async () => {
+        let applications = await getApplications()
+        sorts()
+        getTable(applications)
+    }, 3000)
 
 
     document.getElementById("id").addEventListener("click", () => {
@@ -285,6 +293,8 @@ async function createTable() {
             return 0;
         });
         sorts();
+        getTable(applications)
+
     })
 
     document.getElementById("urgency").addEventListener("click", () => {
@@ -294,6 +304,8 @@ async function createTable() {
             return 0;
         });
         sorts();
+        getTable(applications)
+
     })
     document.getElementById("department").addEventListener("click", () => {
         applications.sort(function (a, b) {
@@ -302,6 +314,8 @@ async function createTable() {
             return 0;
         });
         sorts();
+        getTable(applications)
+
     })
     document.getElementById("applicationDate").addEventListener("click", () => {
         applications.sort(function (a, b) {
@@ -310,6 +324,8 @@ async function createTable() {
             return 0;
         });
         sorts();
+        getTable(applications)
+
     })
     document.getElementById("closed").addEventListener("click", () => {
         applications.sort(function (a, b) {
@@ -318,6 +334,8 @@ async function createTable() {
             return 0;
         });
         sorts();
+        getTable(applications)
+
     })
 
     function sorts() {
@@ -326,7 +344,6 @@ async function createTable() {
         for (let i = 1; i < nodeList.length; i++) {
             parent.removeChild(nodeList[i])
         }
-        getTable()
     }
 
 
@@ -348,6 +365,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // await createExecutorNav()
 
     await createTable()
+
+
 
     // console.log(window.location.origin + window.location.search)
     // console.log(window.location.search)
