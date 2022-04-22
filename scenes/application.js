@@ -37,15 +37,15 @@ department.on("text", async (ctx) => {
 })
 
 const problems = new Composer()
-problems.hears('Отмена заявки', async (ctx) => {
-    try {
-        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
-        return ctx.scene.leave()
-    } catch (e) {
-        console.error(e)
-    }
+// problems.hears('Отмена заявки', async (ctx) => {
+//     try {
+//         await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+//         return ctx.scene.leave()
+//     } catch (e) {
+//         console.error(e)
+//     }
 
-})
+// })
 
 problems.on("text", async (ctx) => {
     try {
@@ -70,9 +70,12 @@ problems.on("text", async (ctx) => {
                 break
             case 'ЦМР':
                 break
-            default:
-                await ctx.replyWithHTML("Нет такого подразделения", Markup.removeKeyboard())
+            case 'Отмена заявки':
+                await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
                 return ctx.scene.leave()
+            default:
+                await ctx.replyWithHTML("Нет такого подразделения")
+                return
         }
 
         await ctx.replyWithHTML("В чем проблема? Опишите или выберите из меню"
@@ -87,9 +90,6 @@ problems.on("text", async (ctx) => {
         console.error(e)
     }
 })
-
-
-
 
 const problemsDetails = new Composer()
 let problemsDetailsText = "Немного подробнее? Опишите или выберите из меню";
@@ -248,16 +248,27 @@ urgency.on("text", async (ctx) => {
 
 
 const roomNumber = new Composer()
-roomNumber.hears('Отмена заявки', async (ctx) => {
-    try {
-        await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
-        return ctx.scene.leave()
-    } catch (e) {
-        console.error(e)
-    }
-})
+
 roomNumber.on("text", async (ctx) => {
     try {
+
+        switch (ctx.message.text) {
+            case 'Срочно (1-2 часа)':
+                break
+            case 'В течении дня':
+                break
+            case 'В течении 2х-3х дней':
+                break
+            case 'В течении недели':
+                break
+            case 'Отмена заявки':
+                await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
+                return ctx.scene.leave()
+            default:
+                await ctx.replyWithHTML("Нет такого периода срочности")
+                return
+        }
+
         ctx.wizard.state.data.urgency = ctx.message.text
         await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.keyboard([
             ['Отмена заявки'],
@@ -269,8 +280,6 @@ roomNumber.on("text", async (ctx) => {
     }
 })
 
-
-
 const conditionStep = new Composer()
 conditionStep.hears('Отмена заявки', async (ctx) => {
     try {
@@ -281,13 +290,10 @@ conditionStep.hears('Отмена заявки', async (ctx) => {
     }
 })
 
-
 conditionStep.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.roomNumber = ctx.message.text
         const wizardData = ctx.wizard.state.data
-
-        let applicationID = Math.floor(wizardData.id / 10)
 
         let currentDate = new Date();
         let dd = currentDate.getDate();
@@ -300,8 +306,6 @@ conditionStep.on("text", async (ctx) => {
 
         let readFileParse = JSON.parse(readFile)
         let nubberID = parseInt(readFileParse[readFileParse.length - 1].id + 1)
-
-        // console.log(readFileParse[readFileParse.length - 1].id)
 
         let answer = (
             `
@@ -396,8 +400,6 @@ conditionStep.on("text", async (ctx) => {
         await ctx.reply(answer, Markup.removeKeyboard(), {
             disable_web_page_preview: true
         });
-
-
 
         return ctx.scene.leave()
     } catch (e) {
