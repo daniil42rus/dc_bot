@@ -29,6 +29,64 @@ function createMenu() {
 }
 
 
+
+function createMenuPol() {
+    let nav = document.createElement('nav')
+    let p1 = document.createElement('a')
+    let p2 = document.createElement('a')
+    let p3 = document.createElement('a')
+    let p4 = document.createElement('a')
+    let p10 = document.createElement('a')
+    let cmr = document.createElement('a')
+    let tp = document.createElement('a')
+    let jk = document.createElement('a')
+    let dc = document.createElement('a')
+
+    p1.textContent = 'Поликлиника 1'
+    p2.textContent = 'Поликлиника 2'
+    p3.textContent = 'Поликлиника 3'
+    p4.textContent = 'Поликлиника 4'
+    p10.textContent = 'Поликлиника 10'
+    cmr.textContent = 'ЦМР'
+    tp.textContent = 'ТП'
+    jk.textContent = 'ЖК'
+    dc.textContent = 'ДЦ'
+
+    p1.classList.add('nav__link')
+    p2.classList.add('nav__link')
+    p3.classList.add('nav__link')
+    p4.classList.add('nav__link')
+    p10.classList.add('nav__link')
+    cmr.classList.add('nav__link')
+    tp.classList.add('nav__link')
+    jk.classList.add('nav__link')
+    dc.classList.add('nav__link')
+
+    p1.href = window.location.origin + '?page=' + p1.textContent
+    p2.href = window.location.origin + '?page=' + p2.textContent
+    p3.href = window.location.origin + '?page=' + p3.textContent
+    p4.href = window.location.origin + '?page=' + p4.textContent
+    p10.href = window.location.origin + '?page=' + p10.textContent
+    cmr.href = window.location.origin + '?page=' + cmr.textContent
+    tp.href = window.location.origin + '?page=' + tp.textContent
+    jk.href = window.location.origin + '?page=' + jk.textContent
+    dc.href = window.location.origin + '?page=' + dc.textContent
+
+
+    nav.append(p1)
+    nav.append(p2)
+    nav.append(p3)
+    nav.append(p4)
+    nav.append(p10)
+    nav.append(cmr)
+    nav.append(tp)
+    nav.append(jk)
+    nav.append(dc)
+
+    container.append(nav)
+}
+
+
 async function createExecutorNav() {
     let nav = document.createElement('nav')
     let executors = await getExecutors()
@@ -162,9 +220,10 @@ function createItems(element) {
 
     if (element.application.urgency === 'В течении дня') {
         let date = new Date(element.applicationDate.date)
-        let deadline = new Date();
-
-        if (date.toLocaleDateString() < deadline.toLocaleDateString()) {
+        let deadline = new Date(date);
+        let nowDate = new Date()
+        deadline.setDate(date.getDate() + 1)
+        if (nowDate > deadline) {
             item.classList.add('deadline')
         }
     }
@@ -174,7 +233,7 @@ function createItems(element) {
         let deadline = new Date(date);
         let nowDate = new Date()
         deadline.setDate(date.getDate() + 3)
-        if (nowDate.toLocaleDateString() > deadline.toLocaleDateString()) {
+        if (nowDate > deadline) {
             item.classList.add('deadline')
         }
     }
@@ -186,7 +245,7 @@ function createItems(element) {
         let deadline = new Date(date);
         let nowDate = new Date()
         deadline.setDate(date.getDate() + 7)
-        if (nowDate.toLocaleDateString() > deadline.toLocaleDateString()) {
+        if (nowDate > deadline) {
             item.classList.add('deadline')
         }
     }
@@ -275,6 +334,69 @@ async function createTable() {
             }
         });
 
+        app.forEach(element => {
+            if (element.open && element.application.department == '1 поликлиника' && pageParams.get("page") == 'Поликлиника 1') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == '2 поликлиника' && pageParams.get("page") == 'Поликлиника 2') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == '3 поликлиника' && pageParams.get("page") == 'Поликлиника 3') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == '4 поликлиника' && pageParams.get("page") == 'Поликлиника 4') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == '10 поликлиника' && pageParams.get("page") == 'Поликлиника 10') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == 'Женская консультация' && pageParams.get("page") == 'ЖК') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == 'ТП' && pageParams.get("page") == 'ТП') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
+        app.forEach(element => {
+            if (element.open && element.application.department == 'ЦМР' && pageParams.get("page") == 'ЦМР') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+ 
+        app.forEach(element => {
+            if (element.open && element.application.department == 'Диагностический центр' && pageParams.get("page") == 'ДЦ') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
     }
     getTable(applications)
 
@@ -283,7 +405,7 @@ async function createTable() {
         let applications = await getApplications()
         sorts()
         getTable(applications)
-    }, 3000)
+    }, 60000)
 
 
     document.getElementById("id").addEventListener("click", () => {
@@ -362,6 +484,7 @@ async function createTable() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     createMenu()
+    createMenuPol()
     // await createExecutorNav()
 
     await createTable()
