@@ -10,8 +10,8 @@ function createMenu() {
     let closed = document.createElement('a')
 
     all.textContent = 'Все заявки'
-    open.textContent = 'Открытые заявки'
-    closed.textContent = 'Закрытые заявки'
+    open.textContent = 'Все открытые заявки'
+    closed.textContent = 'Все закрытые заявки'
 
     all.classList.add('nav__link')
     open.classList.add('nav__link')
@@ -314,14 +314,14 @@ async function createTable() {
 
     function getTable(app) {
         app.forEach(element => {
-            if (element.open && pageParams.get("page") == 'Открытые заявки') {
+            if (element.open && pageParams.get("page") == 'Все открытые заявки') {
                 let item = createItems(element)
                 list.append(item)
             }
         });
 
         app.forEach(element => {
-            if (!element.open && pageParams.get("page") == 'Закрытые заявки') {
+            if (!element.open && pageParams.get("page") == 'Все закрытые заявки') {
                 let item = createItems(element)
                 list.append(item)
             }
