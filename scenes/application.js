@@ -230,7 +230,7 @@ urgency.hears('Отмена заявки', async (ctx) => {
 urgency.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.problemsDetails = ctx.message.text
-        await ctx.replyWithHTML("Укажите сросночть заявки", Markup.keyboard([
+        await ctx.replyWithHTML("Укажите срочночть заявки", Markup.keyboard([
             ['Срочно (1-2 часа)', 'В течении дня'],
             ['В течении 2х-3х дней', 'В течении недели'],
             ['Отмена заявки'],

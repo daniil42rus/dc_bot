@@ -101,7 +101,7 @@ SendIdApplication.on("text", async (ctx) => {
         
         await botMessage.sendMessage(executorID.id, `${wizardData.executorGet} передал вам заявку с ID ${wizardData.idApplication}` );
 
-        await botMessage.sendMessage(findApplicationID.customer.id, `Вашу заявку с ID ${wizardData.idApplication} передана\nНовый исполнитель ${executorID.name}.\nСвязь с новым исполнителем t.me/${executorID.nickName}` );
+        await botMessage.sendMessage(findApplicationID.customer.id, `Ваша заявка с ID ${wizardData.idApplication} передана\nНовый исполнитель ${executorID.name}.\nСвязь с новым исполнителем t.me/${executorID.nickName}` );
 
         await ctx.replyWithHTML("Заявка передана", Markup.removeKeyboard())
 

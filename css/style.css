@@ -36,11 +36,12 @@ span {
     overflow-wrap: break-word;
     padding: 0 10px;
     text-align: center;
+    font-size:0.8em;
 }
 
 li {
     display: grid !important;
-    grid-template-columns: 4% 11% 15% 8% 10% 12% 11% 11% 9% 9%;
+    grid-template-columns: 5% 10% 15% 8% 10% 12% 11% 11% 9% 9%;
 }
 
 nav {

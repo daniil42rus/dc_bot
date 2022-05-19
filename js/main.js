@@ -250,6 +250,8 @@ function createItems(element) {
         }
     }
 
+     
+
 
 
 
@@ -271,14 +273,14 @@ function createItems(element) {
 
     let CreateApplicationDate = new Date(element.applicationDate.date)
 
-    applicationDate.textContent = `${CreateApplicationDate.toLocaleDateString()} в ${CreateApplicationDate.getHours()}:${CreateApplicationDate.getMinutes()}`
+    applicationDate.textContent = `${CreateApplicationDate.toLocaleString()}`
 
 
 
     let closedApplicationDate = new Date(element.closed.date)
 
-    if (element.closed.year) {
-        closed.textContent = `${closedApplicationDate.toLocaleDateString()} в ${closedApplicationDate.getHours()}:${closedApplicationDate.getMinutes()}`
+    if (!element.open) {
+        closed.textContent = `${closedApplicationDate.toLocaleString()}`
     }
 
     item.append(id)
