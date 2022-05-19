@@ -83,6 +83,7 @@ problems.on("text", async (ctx) => {
                 ['Арена', 'Принтер'],
                 ['1С', 'Компьютер'],
                 ['ФСС', 'Регистры'],
+                ['Оборудование'],
                 ['Отмена заявки'],
             ]).oneTime().resize())
         return ctx.wizard.next()
@@ -183,6 +184,21 @@ problemsDetails.hears('Регистры', async (ctx) => {
             ['Не открываются  ', 'Не корректный логин/пароль  '],
             ['Отмена заявки'],
 
+        ]
+        ).oneTime().resize())
+        return ctx.wizard.next()
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+problemsDetails.hears('Оборудование', async (ctx) => {
+    try {
+        ctx.wizard.state.data.problems = ctx.message.text
+        await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
+            ['Не считываются мониторы', '  Не загружается аппаратура'],
+            ['Аппарат не видит принтер'],
+            ['Отмена заявки'],
         ]
         ).oneTime().resize())
         return ctx.wizard.next()
