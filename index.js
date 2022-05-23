@@ -33,19 +33,18 @@ const stage = new Scenes.Stage(
 bot.use(session())
 bot.use(stage.middleware());
 
+let executorFile = fs.readFileSync('./db/executors.json', 'utf-8')
+let executorFileParse = JSON.parse(executorFile)
+let date = new Date
+
 bot.command('admin', (ctx) => {
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
     if (ctx.chat.type == 'private') {
-
-        let date = new Date
-        console.log('Админ',ctx.chat, date.toLocaleString())
-
-        let executorFile = fs.readFileSync('./db/executors.json', 'utf-8')
-        let executorFileParse = JSON.parse(executorFile)
 
         let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
 
-        // console.log(executorID)
-        if (executorID === undefined) {
+        if (executorID == undefined) {
             ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
         } else {
             ctx.replyWithHTML("Выберите из меню нужное действие", Markup.keyboard([
@@ -59,35 +58,72 @@ bot.command('admin', (ctx) => {
 })
 
 bot.hears("Взять заявку по ID", (ctx) => {
-    ctx.scene.enter('takeApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('takeApplicationWizard')
+    }
 })
 
 bot.hears("Закрыть заявку по ID", (ctx) => {
-    ctx.scene.enter('closedApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('closedApplicationWizard')
+    }
 })
 
 bot.hears("Мои открытые заявки", (ctx) => {
-    ctx.scene.enter('myOpenApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('myOpenApplicationWizard')
+    }
 })
 
 bot.hears("Мои закрытые заявки за этот месяц", (ctx) => {
-    ctx.scene.enter('myClosedMonthApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('myClosedMonthApplicationWizard')
+    }
 })
 
 bot.hears("Открытые заявки", (ctx) => {
-    ctx.scene.enter('allOpenApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('allOpenApplicationWizard')
+    }
 })
 
 bot.hears("Изменить исполнителя", (ctx) => {
-    ctx.scene.enter('sendApplicationWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('sendApplicationWizard')
+    }
 })
 
 bot.hears("Отправить сообщение", (ctx) => {
-    ctx.scene.enter('messageAllWizard')
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+    if (ctx.chat.type == 'private' || executorID == undefined) {
+        ctx.scene.enter('messageAllWizard')
+    }
 })
 
 bot.command('statistic', (ctx) => {
-    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2) {
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2 || ctx.chat.type == 'private') {
         ctx.scene.enter('statisticsWizard')
     } else {
         ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
@@ -96,7 +132,9 @@ bot.command('statistic', (ctx) => {
 })
 
 bot.command('person', (ctx) => {
-    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2) {
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
+    if (ctx.from.id == process.env.admin1 || ctx.from.id == process.env.admin2 || ctx.chat.type == 'private') {
 
         ctx.scene.enter('personOpenApplicationWizard')
     } else {
@@ -105,16 +143,16 @@ bot.command('person', (ctx) => {
 })
 
 bot.command('new_application', (ctx) => {
-    let date = new Date
-    console.log('new_application',ctx.chat, date.toLocaleString())
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
     if (ctx.chat.type == 'private') {
         ctx.scene.enter('applicationWizard')
     }
 })
 
 bot.command('open_application', (ctx) => {
-    let date = new Date
-    console.log('open_application',ctx.chat, date.toLocaleString())
+
+    console.log(ctx.message.text, ctx.chat, date.toLocaleString())
     if (ctx.chat.type == 'private') {
         ctx.scene.enter('customerOpenApplicationWizard')
     }
@@ -122,8 +160,8 @@ bot.command('open_application', (ctx) => {
 
 
 bot.on('message', (ctx) => {
-    let date = new Date
-    console.log('Сообщение',ctx.chat, date.toLocaleString())
+
+    console.log('Сообщение', ctx.message.text, ctx.chat, date.toLocaleString())
     if (ctx.chat.type == 'private') {
         ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
     }
