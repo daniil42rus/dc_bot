@@ -9,10 +9,7 @@ const { Console } = require('console');
 const department = new Composer()
 department.on("text", async (ctx) => {
     try {
-        let date = new Date
-
-        console.log(ctx.chat, date.toLocaleString())
-
+       
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id

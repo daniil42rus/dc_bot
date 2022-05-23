@@ -34,22 +34,27 @@ bot.use(session())
 bot.use(stage.middleware());
 
 bot.command('admin', (ctx) => {
+    if (ctx.chat.type == 'private') {
 
-    let executorFile = fs.readFileSync('./db/executors.json', 'utf-8')
-    let executorFileParse = JSON.parse(executorFile)
+        let date = new Date
+        console.log('Админ',ctx.chat, date.toLocaleString())
 
-    let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+        let executorFile = fs.readFileSync('./db/executors.json', 'utf-8')
+        let executorFileParse = JSON.parse(executorFile)
 
-    // console.log(executorID)
-    if (executorID === undefined) {
-        ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
-    } else {
-        ctx.replyWithHTML("Выберите из меню нужное действие", Markup.keyboard([
-            ['Взять заявку по ID', 'Закрыть заявку по ID'],
-            ['Мои открытые заявки', 'Мои закрытые заявки за этот месяц'],
-            ['Открытые заявки', 'Изменить исполнителя'],
-            ['Отправить сообщение'],
-        ]).oneTime().resize())
+        let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == ctx.from.id)
+
+        // console.log(executorID)
+        if (executorID === undefined) {
+            ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
+        } else {
+            ctx.replyWithHTML("Выберите из меню нужное действие", Markup.keyboard([
+                ['Взять заявку по ID', 'Закрыть заявку по ID'],
+                ['Мои открытые заявки', 'Мои закрытые заявки за этот месяц'],
+                ['Открытые заявки', 'Изменить исполнителя'],
+                ['Отправить сообщение'],
+            ]).oneTime().resize())
+        }
     }
 })
 
@@ -100,18 +105,26 @@ bot.command('person', (ctx) => {
 })
 
 bot.command('new_application', (ctx) => {
-    if (ctx.chat.id != process.env.applicationChat) {
+    let date = new Date
+    console.log('new_application',ctx.chat, date.toLocaleString())
+    if (ctx.chat.type == 'private') {
         ctx.scene.enter('applicationWizard')
     }
 })
 
 bot.command('open_application', (ctx) => {
-    ctx.scene.enter('customerOpenApplicationWizard')
+    let date = new Date
+    console.log('open_application',ctx.chat, date.toLocaleString())
+    if (ctx.chat.type == 'private') {
+        ctx.scene.enter('customerOpenApplicationWizard')
+    }
 })
 
 
 bot.on('message', (ctx) => {
-    if (ctx.chat.id != process.env.applicationChat) {
+    let date = new Date
+    console.log('Сообщение',ctx.chat, date.toLocaleString())
+    if (ctx.chat.type == 'private') {
         ctx.reply('Что бы отправить завяку в ИТ отдел, нажмите /new_application', Markup.removeKeyboard())
     }
 })

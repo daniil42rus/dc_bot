@@ -8,6 +8,7 @@ const { Console } = require('console');
 const customerOpenApplication = new Composer()
 customerOpenApplication.on("text", async (ctx) => {
     try {
+
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id
