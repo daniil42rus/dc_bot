@@ -9,7 +9,6 @@ const { Console } = require('console');
 const department = new Composer()
 department.on("text", async (ctx) => {
     try {
-       
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id
@@ -20,7 +19,7 @@ department.on("text", async (ctx) => {
         ctx.wizard.state.data.text = ctx.message.text
 
         await ctx.replyWithHTML("Выберите подразделение из меню", Markup.keyboard([
-            ['Диагностический центр'],
+            ['Диагностический центр', 'Дарвина'],
             ['1 поликлиника', '2 поликлиника'],
             ['3 поликлиника', '4 поликлиника'],
             ['10 поликлиника', 'Женская консультация'],
@@ -50,6 +49,8 @@ problems.on("text", async (ctx) => {
 
         switch (ctx.message.text) {
             case 'Диагностический центр':
+                break
+            case 'Дарвина':
                 break
             case '1 поликлиника':
                 break
