@@ -82,6 +82,7 @@ problems.on("text", async (ctx) => {
                 ['1С', 'Компьютер'],
                 ['ФСС', 'Регистры'],
                 ['Оборудование'],
+                ['Выпустить ЭЦП'],
                 ['Отмена заявки'],
             ]).oneTime().resize())
         return ctx.wizard.next()
@@ -209,6 +210,19 @@ problemsDetails.hears('Отмена заявки', async (ctx) => {
     try {
         await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
         return ctx.scene.leave()
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+problemsDetails.hears('Выпустить ЭЦП', async (ctx) => {
+    try {
+        ctx.wizard.state.data.problems = ctx.message.text
+        await ctx.replyWithHTML("ФИО врача и должность?", Markup.keyboard([
+            ['Отмена заявки'],
+        ]
+        ).oneTime().resize())
+        return ctx.wizard.next()
     } catch (e) {
         console.error(e)
     }
