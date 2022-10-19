@@ -81,8 +81,7 @@ problems.on("text", async (ctx) => {
                 ['Арена', 'Принтер'],
                 ['1С', 'Компьютер'],
                 ['ФСС', 'Регистры'],
-                ['Оборудование'],
-                ['Выпустить ЭЦП'],
+                ['Оборудование','ЭЦП'],
                 ['Отмена заявки'],
             ]).oneTime().resize())
         return ctx.wizard.next()
@@ -101,7 +100,7 @@ problemsDetails.hears('Арена', async (ctx) => {
             ['Не запускается', '  Не работает '],
             ['Зависла', 'Нет шаблона'],
             ['Создать шаблон', 'Ошибка на экране'],
-            ['Не печатает'],
+            ['Не печатает','ЭЦП не подписывает'],
             ['Отмена заявки'],
         ]
         ).oneTime().resize())
@@ -166,6 +165,7 @@ problemsDetails.hears('ФСС', async (ctx) => {
         ctx.wizard.state.data.problems = ctx.message.text
         await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
             ['Не отправляет  ', 'Не принимает  '],
+            ['ЭЦП не подписывает'],
             ['Отмена заявки'],
 
         ]
@@ -215,10 +215,12 @@ problemsDetails.hears('Отмена заявки', async (ctx) => {
     }
 })
 
-problemsDetails.hears('Выпустить ЭЦП', async (ctx) => {
+problemsDetails.hears('ЭЦП', async (ctx) => {
     try {
         ctx.wizard.state.data.problems = ctx.message.text
-        await ctx.replyWithHTML("ФИО врача и должность?", Markup.keyboard([
+        await ctx.replyWithHTML(problemsDetailsText, Markup.keyboard([
+            ['Выпустить ЭЦП', '  Установить ЭЦП'],
+            ['Аннулировать ЭЦП', 'ЭЦП не подписывает'],
             ['Отмена заявки'],
         ]
         ).oneTime().resize())
