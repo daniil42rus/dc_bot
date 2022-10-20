@@ -81,7 +81,7 @@ problems.on("text", async (ctx) => {
                 ['Арена', 'Принтер'],
                 ['1С', 'Компьютер'],
                 ['ФСС', 'Регистры'],
-                ['Оборудование','ЭЦП'],
+                ['Оборудование', 'ЭЦП'],
                 ['Отмена заявки'],
             ]).oneTime().resize())
         return ctx.wizard.next()
@@ -100,7 +100,7 @@ problemsDetails.hears('Арена', async (ctx) => {
             ['Не запускается', '  Не работает '],
             ['Зависла', 'Нет шаблона'],
             ['Создать шаблон', 'Ошибка на экране'],
-            ['Не печатает','ЭЦП не подписывает'],
+            ['Не печатает', 'ЭЦП не подписывает'],
             ['Отмена заявки'],
         ]
         ).oneTime().resize())
@@ -300,11 +300,25 @@ roomNumber.on("text", async (ctx) => {
         }
 
         ctx.wizard.state.data.urgency = ctx.message.text
-        await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.keyboard([
-            ['Отмена заявки'],
-        ]
-        ).oneTime().resize())
+
+        if (ctx.wizard.state.data.problems == 'ЭЦП') {
+
+            await ctx.replyWithHTML("ФИО и должность врача? ", Markup.keyboard([
+                ['Отмена заявки'],
+            ]
+            ).oneTime().resize())
+
+        } else {
+            await ctx.replyWithHTML("Какой у вас кабинет? ", Markup.keyboard([
+                ['Отмена заявки'],
+            ]
+            ).oneTime().resize())
+        }
+
+
+
         return ctx.wizard.next()
+
     } catch (e) {
         console.error(e)
     }
