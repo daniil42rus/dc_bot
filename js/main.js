@@ -29,6 +29,20 @@ function createMenu() {
 }
 
 
+function createMenuept() {
+    let nav = document.createElement('nav')
+    let allept = document.createElement('a')
+
+    allept.textContent = 'allept'
+    allept.classList.add('nav__link')
+
+    allept.href = window.location.origin + '?page=' + allept.textContent
+
+    nav.append(allept)
+    container.append(nav)
+}
+
+
 
 function createMenuPol() {
     let nav = document.createElement('nav')
@@ -399,6 +413,13 @@ async function createTable() {
             }
         });
 
+        app.forEach(element => {
+            if (element.open && element.application.problems == 'ЭЦП' || element.application.problems == 'Выпустить ЭЦП' && pageParams.get("page") == 'allept') {
+                let item = createItems(element)
+                list.append(item)
+            }
+        });
+
     }
     getTable(applications)
 
@@ -487,6 +508,9 @@ async function createTable() {
 document.addEventListener('DOMContentLoaded', async () => {
     createMenu()
     createMenuPol()
+    createMenuept()
+
+
     // await createExecutorNav()
 
     await createTable()
