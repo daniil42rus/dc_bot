@@ -264,7 +264,7 @@ function createItems(element) {
         }
     }
 
-     
+
 
 
 
@@ -405,7 +405,7 @@ async function createTable() {
                 list.append(item)
             }
         });
- 
+
         app.forEach(element => {
             if (element.open && element.application.department == 'Диагностический центр' && pageParams.get("page") == 'ДЦ') {
                 let item = createItems(element)
@@ -414,7 +414,7 @@ async function createTable() {
         });
 
         app.forEach(element => {
-            if (element.open && element.application.problems == 'ЭЦП' || element.application.problems == 'Выпустить ЭЦП' && pageParams.get("page") == 'allept') {
+            if (element.open && element.application.problems == 'ЭЦП' | element.application.problems == 'Выпустить ЭЦП' && pageParams.get("page") == 'allept') {
                 let item = createItems(element)
                 list.append(item)
             }
