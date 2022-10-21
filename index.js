@@ -2,6 +2,15 @@ const { Telegraf, Markup, Scenes, session } = require('telegraf')
 require('dotenv').config();
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const fs = require('fs');
+const fetch = require('node-fetch');
+
+const { createWriteStream } = require('node:fs');
+const { pipeline } = require('node:stream');
+const { promisify } = require('node:util');
+
+
+
+
 
 const applicationScene = require("./scenes/application.js")
 const takeApplicationScene = require("./scenes/takeApplication.js")
@@ -14,6 +23,7 @@ const sendStatisticsScene = require("./scenes/statistics.js")
 const personOpenApplicationScene = require("./scenes/personOpenApplication.js")
 const messageAllScene = require("./scenes/massageAll.js")
 const customerOpenApplicationScene = require("./scenes/customerOpenApplication.js")
+const testPhotoScene = require('./scenes/test.js')
 
 const stage = new Scenes.Stage(
     [
@@ -27,7 +37,8 @@ const stage = new Scenes.Stage(
         sendStatisticsScene,
         personOpenApplicationScene,
         messageAllScene,
-        customerOpenApplicationScene
+        customerOpenApplicationScene,
+        testPhotoScene,
     ])
 
 bot.use(session())
@@ -158,6 +169,78 @@ bot.command('open_application', (ctx) => {
     }
 })
 
+
+bot.hears('test', async (ctx) => {
+
+
+    // let file_id = ctx.message.photo[ctx.message.photo.length - 1]?.file_id;
+    // console.log(file_id);
+
+    // const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${file_id}`);
+    // const body = await response.json()
+
+    // const fileLink = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${body.result.file_path}`
+
+    // const file_path = body.result.file_path;
+    // const urljpg = await fetch(`https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file_path}`);
+
+
+
+
+
+    // console.log('Сообщение', ctx.message.text, ctx.chat, date.toLocaleString())
+    // if (ctx.chat.type == 'private') {
+    //     ctx.reply(fileLink, Markup.removeKeyboard())
+    // }
+
+
+
+    ctx.scene.enter('testPhotoWizard')
+})
+
+
+
+bot.on('photo', async (ctx) => {
+
+
+    let file_id = ctx.message.photo[ctx.message.photo.length - 1]?.file_id;
+    console.log(file_id);
+    const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${file_id}`
+    const responselink = await fetch(url);
+    const body = await responselink.json()
+
+    const fileLink = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${body.result.file_path}`
+
+    // const file_path = body.result.file_path;
+    // const urljpg = await fetch(`https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file_path}`);
+
+
+
+    // const responseimg = await fetch(`https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${body.result.file_path}`);
+
+    // console.log(responseimg);
+
+
+    const streamPipeline = promisify(pipeline);
+
+    const response = await fetch(fileLink);
+
+    if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
+
+    await streamPipeline(response.body, createWriteStream(`./uploads/${body.result.file_path}`));
+
+
+
+
+    console.log('Сообщение', ctx.message, body.result.file_path , ctx.chat, date.toLocaleString())
+    if (ctx.chat.type == 'private') {
+        ctx.reply(fileLink, Markup.removeKeyboard())
+    }
+
+
+
+
+})
 
 bot.on('message', (ctx) => {
 
