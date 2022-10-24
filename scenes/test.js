@@ -9,28 +9,9 @@ const multer = require("multer");
 
 const fs = require('fs');
 const { Console } = require('console');
-// const { MongoClient } = require('mongodb');
 
-const { connect } = require('./connectDb');
+const { connect } = require('../functions/connectDb');
 
-
-
-
-
-// const url = process.env.DB_URL;
-// const mongoClient = new MongoClient(url)
-
-// const connect = async () => {
-//     try {
-//         await mongoClient.connect();
-//         console.log('соединение есть');
-//         const db = mongoClient.db('tgBot');
-
-//         return db
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
 
 const adminsList = async () => {
     const db = await connect()
@@ -40,9 +21,27 @@ const adminsList = async () => {
 
     } else {
         console.log(('link Admins'));
-        const admins = db.collection("admins");
+        const admins = db.collection("customer");
         const results = await admins.find().toArray();
-        console.log(results);
+        // let find = results.filter(results => results.id  == 511869236)
+        // const results = await admins.findOne({ 'id': 511869236 });
+
+        // results.forEach(element => {
+
+        //     console.log(element.customer.id);
+        //     if (511869236 == element.customer.id) {
+        //         console.log(true);
+        //     }
+
+        // });
+
+        // console.log(parseInt(results[results.length - 1].id));
+        // console.log(results);
+        if (results == null) {
+            console.log('отстой');
+        } else {
+            // console.log(results);
+        }
     }
 }
 adminsList();
@@ -93,23 +92,14 @@ problems.on("text", async (ctx) => {
 
         switch (ctx.message.text) {
             case 'Диагностический центр':
-                break
             case 'Дарвина':
-                break
             case '1 поликлиника':
-                break
             case '2 поликлиника':
-                break
             case '3 поликлиника':
-                break
             case '4 поликлиника':
-                break
             case '10 поликлиника':
-                break
             case 'Женская консультация':
-                break
             case 'ТП':
-                break
             case 'ЦМР':
                 break
             case 'Отмена заявки':
@@ -287,10 +277,6 @@ problemsDetails.on("text", async (ctx) => {
     }
 })
 
-
-
-
-
 const urgency = new Composer()
 urgency.hears('Отмена заявки', async (ctx) => {
     try {
@@ -434,9 +420,6 @@ conditionStep.hears('Отмена заявки', async (ctx) => {
 
 conditionStep.on("text", async (ctx) => {
     try {
-
-        const db = await connect();
-
         ctx.wizard.state.data.roomNumber = ctx.message.text
         const wizardData = ctx.wizard.state.data
 
@@ -447,10 +430,14 @@ conditionStep.on("text", async (ctx) => {
         let hours = currentDate.getHours()
         let minutes = currentDate.getMinutes()
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        const db = await connect();
+        const applications = db.collection("applications");
+        const customer = db.collection("customer");
 
-        let readFileParse = JSON.parse(readFile)
-        let nubberID = parseInt(readFileParse[readFileParse.length - 1].id + 1)
+        const applicationsArr = await applications.find().toArray();
+ 
+        let nubberID = parseInt(applicationsArr[applicationsArr.length - 1].id + 1)
+
 
         let answer = (
             `
@@ -517,57 +504,34 @@ conditionStep.on("text", async (ctx) => {
             },
         };
 
-
-
-
-
+        let customerJson = {
+            firstName: wizardData.firstName,
+            id: wizardData.userId,
+            nickName: wizardData.userName,
+        };
 
         await botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin, {
             disable_web_page_preview: true
         });
 
-        let all = readFile.substring(0, readFile.length - 1) + ',' + JSON.stringify(answerJSON) + ']';
-        fs.writeFileSync('./db/applications.json', all);
-
-
-        let readCustomer = fs.readFileSync('./db/customer.json', 'utf-8')
-        let readCustomerParse = JSON.parse(readCustomer)
-
-        let findCustomer = readCustomerParse.find(readCustomerParse => readCustomerParse.customer.id == wizardData.userId)
-
-        if (findCustomer == undefined) {
-
-            let customerJson = {
-                customer: {
-                    firstName: wizardData.firstName,
-                    id: wizardData.userId,
-                    nickName: wizardData.userName,
-                }
-            };
-
-            if (typeof db == undefined) {
-                console.log('Admins undefined');
-                throw new Error("Нет соединения");
-            } else {
-                console.log(('add app'));
-                const customer = db.collection("customer");
-                await customer.insertOne(customerJson);
-
-            }
-            let newCustomer = readCustomer.substring(0, readCustomer.length - 1) + ',' + JSON.stringify(customerJson) + ']';
-            fs.writeFileSync('./db/customer.json', newCustomer);
-        }
-
-
         if (typeof db == undefined) {
             console.log('Admins undefined');
             throw new Error("Нет соединения");
         } else {
-            console.log(('add app'));
-            const applications = db.collection("applications");
-            await applications.insertOne(answerJSON);
-        }
+            
+            //положить заявку в БД
 
+            await applications.insertOne(answerJSON);
+            console.log('Заявка добавленна в БД');
+
+            const results = await customer.findOne({ 'id': parseInt(wizardData.userId) });
+            if (results == null) {
+                customer.insertOne(customerJson);
+                console.log('Полдьзователь добавлен в БД');
+            } else {
+                console.log('Полдьзователь имеется в БД');
+            }
+        }
 
         await ctx.reply(answer, Markup.removeKeyboard(), {
             disable_web_page_preview: true

@@ -1,10 +1,53 @@
 const { Markup, Composer, Scenes } = require('telegraf')
 const TelegramBot = require('node-telegram-bot-api');
-const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 require('dotenv').config();
+const botMessage = new TelegramBot(process.env.BOT_TOKEN);
+const fetch = require('node-fetch');
+
+const express = require("express");
+const multer = require("multer");
 
 const fs = require('fs');
 const { Console } = require('console');
+
+const { connect } = require('../functions/connectDb');
+
+
+const adminsList = async () => {
+    const db = await connect()
+    if (typeof db == 'undefined') {
+        console.log('Admins undefined');
+        throw new Error("Нет соединения");
+
+    } else {
+        console.log(('link Admins'));
+        const admins = db.collection("customer");
+        // const results = await admins.find().toArray();
+        // let find = results.filter(results => results.id  == 511869236)
+        const results = await admins.findOne({ 'id': 511869236 });
+
+        // results.forEach(element => {
+
+        //     console.log(element.customer.id);
+        //     if (511869236 == element.customer.id) {
+        //         console.log(true);
+        //     }
+
+        // });
+
+        // console.log(parseInt(results[results.length - 1].id));
+        // console.log(results);
+        if (results == null) {
+            console.log('отстой');
+        } else {
+            // console.log(results);
+        }
+    }
+}
+adminsList();
+
+
+
 
 const department = new Composer()
 department.on("text", async (ctx) => {
@@ -49,23 +92,14 @@ problems.on("text", async (ctx) => {
 
         switch (ctx.message.text) {
             case 'Диагностический центр':
-                break
             case 'Дарвина':
-                break
             case '1 поликлиника':
-                break
             case '2 поликлиника':
-                break
             case '3 поликлиника':
-                break
             case '4 поликлиника':
-                break
             case '10 поликлиника':
-                break
             case 'Женская консультация':
-                break
             case 'ТП':
-                break
             case 'ЦМР':
                 break
             case 'Отмена заявки':
@@ -243,10 +277,6 @@ problemsDetails.on("text", async (ctx) => {
     }
 })
 
-
-
-
-
 const urgency = new Composer()
 urgency.hears('Отмена заявки', async (ctx) => {
     try {
@@ -256,6 +286,60 @@ urgency.hears('Отмена заявки', async (ctx) => {
         console.error(e)
     }
 })
+
+urgency.on('photo', async (ctx) => {
+    try {
+        ctx.wizard.state.data.problemsDetails = ctx.message.text
+
+
+
+        let file_id = ctx.message.photo[ctx.message.photo.length - 1]?.file_id;
+        console.log(file_id);
+        const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${file_id}`);
+        const body = await response.json()
+        const fileLink = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${body.result.file_path}`
+        // const file_path = body.result.file_path;
+        // const urljpg = await fetch(`https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file_path}`);
+
+        ctx.wizard.state.data.problemsDetailsPhoto = fileLink
+
+
+
+
+
+        function saveImg(blob) {
+            let link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `${Date.now()}`);
+            link.click();
+        }
+
+        fetch(fileLink)
+            .then(response_object => response_object.blob())
+            .then(blob_object => saveImg(blob_object))
+
+
+
+
+        ctx.reply(fileLink)
+
+        await ctx.replyWithHTML("Укажите срочночть заявки", Markup.keyboard([
+            ['Срочно (1-2 часа)', 'В течении дня'],
+            ['В течении 2х-3х дней', 'В течении недели'],
+            ['Отмена заявки'],
+
+        ]
+        ).oneTime().resize())
+        return ctx.wizard.next()
+
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+
+
+
 
 urgency.on("text", async (ctx) => {
     try {
@@ -346,10 +430,14 @@ conditionStep.on("text", async (ctx) => {
         let hours = currentDate.getHours()
         let minutes = currentDate.getMinutes()
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        const db = await connect();
+        const applications = db.collection("applications");
+        const customer = db.collection("customer");
 
-        let readFileParse = JSON.parse(readFile)
-        let nubberID = parseInt(readFileParse[readFileParse.length - 1].id + 1)
+        const applicationsArr = await applications.find().toArray();
+ 
+        let nubberID = parseInt(applicationsArr[applicationsArr.length - 1].id + 1)
+
 
         let answer = (
             `
@@ -359,6 +447,8 @@ conditionStep.on("text", async (ctx) => {
       Отправитель:  ${wizardData.firstName}      
       В чем проблема:   ${wizardData.problems}      
       Описание:   ${wizardData.problemsDetails} 
+      PhotoLink:   ${wizardData.problemsDetailsPhoto} 
+
       id заявки:  ${nubberID}       
         `);
 
@@ -368,77 +458,79 @@ conditionStep.on("text", async (ctx) => {
         );
 
         answerJSON = {
-            'id': nubberID,
+            id: nubberID,
 
-            'open': true,
+            open: true,
 
-            'application': {
-                'department': wizardData.title,
-                'roomNumber': wizardData.roomNumber,
-                'problems': wizardData.problems,
-                'problemsDetails': wizardData.problemsDetails,
-                'urgency': wizardData.urgency,
+            application: {
+                department: wizardData.title,
+                roomNumber: wizardData.roomNumber,
+                problems: wizardData.problems,
+                problemsDetails: wizardData.problemsDetails,
+                PhotoLink: wizardData.problemsDetailsPhoto,
+
+                urgency: wizardData.urgency,
             },
 
-            'customer': {
-                'firstName': wizardData.firstName,
-                'id': wizardData.userId,
-                'nickName': wizardData.userName,
+            customer: {
+                firstName: wizardData.firstName,
+                id: wizardData.userId,
+                nickName: wizardData.userName,
             },
 
-            'executor': {
-                'name': false,
-                'id': false,
-                'nickName': false,
+            executor: {
+                name: false,
+                id: false,
+                nickName: false,
             },
 
-            'closed': {
-                'day': false,
-                'month': false,
-                'year': false,
-                'hours': false,
-                'minutes': false,
-                'date': false,
+            closed: {
+                day: false,
+                month: false,
+                year: false,
+                hours: false,
+                minutes: false,
+                date: false,
 
             },
 
-            'applicationDate': {
-                'day': dd,
-                'month': mm,
-                'year': yyyy,
-                'hours': hours,
-                'minutes': minutes,
-                'date': currentDate.toISOString(),
+            applicationDate: {
+                day: dd,
+                month: mm,
+                year: yyyy,
+                hours: hours,
+                minutes: minutes,
+                date: currentDate.toISOString(),
             },
         };
 
-
-
+        let customerJson = {
+            firstName: wizardData.firstName,
+            id: wizardData.userId,
+            nickName: wizardData.userName,
+        };
 
         await botMessage.sendMessage(process.env.applicationChat, answer + answerAdmin, {
             disable_web_page_preview: true
         });
 
-        let all = readFile.substring(0, readFile.length - 1) + ',' + JSON.stringify(answerJSON) + ']';
-        fs.writeFileSync('./db/applications.json', all);
+        if (typeof db == undefined) {
+            console.log('Admins undefined');
+            throw new Error("Нет соединения");
+        } else {
+            
+            //положить заявку в БД
 
+            await applications.insertOne(answerJSON);
+            console.log('Заявка добавленна в БД');
 
-        let readCustomer = fs.readFileSync('./db/customer.json', 'utf-8')
-        let readCustomerParse = JSON.parse(readCustomer)
-
-        let findCustomer = readCustomerParse.find(readCustomerParse => readCustomerParse.customer.id == wizardData.userId)
-
-        if (findCustomer == undefined) {
-
-            let customer = {
-                'customer': {
-                    'firstName': wizardData.firstName,
-                    'id': wizardData.userId,
-                    'nickName': wizardData.userName,
-                }
+            const results = await customer.findOne({ 'id': parseInt(wizardData.userId) });
+            if (results == null) {
+                customer.insertOne(customerJson);
+                console.log('Полдьзователь добавлен в БД');
+            } else {
+                console.log('Полдьзователь имеется в БД');
             }
-            let newCustomer = readCustomer.substring(0, readCustomer.length - 1) + ',' + JSON.stringify(customer) + ']';
-            fs.writeFileSync('./db/customer.json', newCustomer);
         }
 
         await ctx.reply(answer, Markup.removeKeyboard(), {

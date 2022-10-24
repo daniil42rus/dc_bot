@@ -4,6 +4,8 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../functions/connectDb');
+
 
 
 
@@ -30,9 +32,6 @@ idApplication.on("text", async (ctx) => {
 
 const closedIdApplication = new Composer()
 closedIdApplication.on("text", async (ctx) => {
-    // await ctx.reply("ЗАКРЫТО ЕЙК", Markup.removeKeyboard());
-
-
 
     try {
 

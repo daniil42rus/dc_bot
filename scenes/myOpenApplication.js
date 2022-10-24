@@ -4,10 +4,15 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../functions/connectDb');
+
 
 const myOpenApplication = new Composer()
 myOpenApplication.on("text", async (ctx) => {
     try {
+        const db = await connect()
+        const applications = db.collection("applications");
+
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id
@@ -19,33 +24,31 @@ myOpenApplication.on("text", async (ctx) => {
 
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
-
+        let applicationsArr = await applications.find({ 'executor.id': wizardData.userId }).toArray()
         let number = [];
+        let findApplications = applicationsArr.filter(results => results.open)
+
+        console.log(findApplications);
 
 
-        for (i of readFileParse) {
+        for (i of findApplications) {
 
             let answer = (
                 `
-                ${i.application.department} 
-          Номер кабинета: ${i.application.roomNumber}       
-          Срочность:  ${i.application.urgency}       
-          Отправитель:  ${i.customer.firstName}      
-          В чем проблема:   ${i.application.problems}      
-          Описание:   ${i.application.problemsDetails} 
-          id заявки:  ${i.id}       
-            `);
+                    ${i.application.department} 
+              Номер кабинета: ${i.application.roomNumber}       
+              Срочность:  ${i.application.urgency}       
+              Отправитель:  ${i.customer.firstName}      
+              В чем проблема:   ${i.application.problems}      
+              Описание:   ${i.application.problemsDetails} 
+              id заявки:  ${i.id}       
+                `);
 
-
-            if (i.open && wizardData.userId == i.executor.id) {
-                number.push(i.id)
-                await ctx.reply(`${answer} `);
-            }
+            number.push(i.id)
+            await ctx.reply(`${answer} `);
         }
 
-        await ctx.reply(`Всего ${number.length} шт.`,Markup.removeKeyboard());
+        await ctx.reply(`Всего ${number.length} шт.`, Markup.removeKeyboard());
 
         return ctx.scene.leave()
     } catch (e) {
