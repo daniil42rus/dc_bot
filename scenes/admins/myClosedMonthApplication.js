@@ -4,10 +4,16 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../../functions/connectDb');
+
+
 
 const myClosedMonthApplication = new Composer()
 myClosedMonthApplication.on("text", async (ctx) => {
     try {
+        const db = await connect()
+        const applications = db.collection("applications");
+
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id
@@ -19,16 +25,18 @@ myClosedMonthApplication.on("text", async (ctx) => {
 
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
-
+        // let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        // let readFileParse = JSON.parse(readFile)
+       
+        let applicationsArr = await applications.find({ 'executor.id': wizardData.userId }).toArray()
         let number = [];
+        let findApplications = applicationsArr.filter(results => !results.open)
 
         let currentDate = new Date();
         let mm = currentDate.getMonth() + 1;
 
 
-        for (i of readFileParse) {
+        for (i of findApplications) {
 
 
 

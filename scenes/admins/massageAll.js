@@ -4,6 +4,8 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../../functions/connectDb');
+
 
 
 const messageText = new Composer()
@@ -29,23 +31,26 @@ messageText.on("text", async (ctx) => {
 const newMessage = new Composer()
 newMessage.on("text", async (ctx) => {
     try {
+
         ctx.wizard.state.data.messageText = ctx.message.text
         const wizardData = ctx.wizard.state.data
-        let customerFile = fs.readFileSync('./db/customer.json', 'utf-8')
-        let customerFileParse = JSON.parse(customerFile)
+
+        const db = await connect()
+        const customer = db.collection("customer");
+        const customerArr = await customer.find().toArray()
+        console.log(customerArr);
+        // let customerFile = fs.readFileSync('./db/customer.json', 'utf-8')
+        // let customerFileParse = JSON.parse(customerFile)
+
         let number = [];
-        for (i in customerFileParse) {
+        for (i in customerArr) {
             try {
-
-                await botMessage.sendMessage(customerFileParse[i].customer.id, wizardData.messageText);
-                number.push(customerFileParse[i].customer.id)
-
+                await botMessage.sendMessage(customerArr[i].id, wizardData.messageText);
+                number.push(customerArr[i].id)
             } catch (e) {
-                // console.error(e)
+                console.log(`${customerArr[i].id}, ${customerArr[i].firstName} Пользователь завершил общение с ботом`);
             }
-            console.log(i)
         }
-        console.log(number)
 
         await ctx.reply(`Сообщение отправиленно ${number.length} пользователям`, Markup.removeKeyboard())
         return ctx.scene.leave()

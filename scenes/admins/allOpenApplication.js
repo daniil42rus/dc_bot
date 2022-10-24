@@ -4,10 +4,15 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../../functions/connectDb');
+
 
 const allOpenApplication = new Composer()
 allOpenApplication.on("text", async (ctx) => {
     try {
+
+
+
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
         ctx.wizard.state.data.userId = ctx.message.from.id
@@ -19,14 +24,19 @@ allOpenApplication.on("text", async (ctx) => {
 
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
+        // let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        // let readFileParse = JSON.parse(readFile)
+
+        const db = await connect()
+        const applications = db.collection("applications");
+        let applicationsArr = await applications.find({ open: true }).toArray();
+
 
         let number = [];
 
 
 
-        for (i of readFileParse) {
+        for (i of applicationsArr) {
 
             let answer = (
                 `
@@ -46,7 +56,7 @@ allOpenApplication.on("text", async (ctx) => {
             }
         }
 
-        await ctx.reply(`Всего открыто ${number.length} шт.`,Markup.removeKeyboard());
+        await ctx.reply(`Всего открыто ${number.length} шт.`, Markup.removeKeyboard());
 
         return ctx.scene.leave()
     } catch (e) {

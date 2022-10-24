@@ -4,9 +4,7 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
-const { connect } = require('../functions/connectDb');
-
-
+const { connect } = require('../../functions/connectDb');
 
 const idApplication = new Composer()
 idApplication.on("text", async (ctx) => {

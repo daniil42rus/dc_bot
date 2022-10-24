@@ -4,6 +4,9 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../../functions/connectDb');
+
+
 
 
 const personApplication = new Composer()
@@ -34,18 +37,26 @@ personApplication.on("text", async (ctx) => {
 const openApplication = new Composer()
 openApplication.on("text", async (ctx) => {
     try {
- 
+
+        const db = await connect()
+        const applications = db.collection("applications");
+
         ctx.wizard.state.data.personApplication = ctx.message.text
 
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
+        // let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
+        // let readFileParse = JSON.parse(readFile)
+
+        let applicationsArr = await applications.find({ 'executor.name': wizardData.personApplication }).toArray()
+        let applicationsArrOpen = applicationsArr.filter(obj => obj.open)
+
+
 
         let number = [];
 
 
-        for (i of readFileParse) {
+        for (i of applicationsArrOpen) {
 
             let answer = (
                 `
@@ -59,13 +70,13 @@ openApplication.on("text", async (ctx) => {
             `);
 
 
-            if (i.open && wizardData.personApplication == i.executor.name) {
+            // if (i.open && wizardData.personApplication == i.executor.name) {
                 number.push(i.id)
                 await ctx.reply(`${answer} `);
-            }
+            // }
         }
 
-        await ctx.reply(`Всего ${number.length} шт.`,Markup.removeKeyboard());
+        await ctx.reply(`Всего ${number.length} шт.`, Markup.removeKeyboard());
 
         return ctx.scene.leave()
     } catch (e) {

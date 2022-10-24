@@ -10,7 +10,7 @@ const multer = require("multer");
 const fs = require('fs');
 const { Console } = require('console');
 
-const { connect } = require('../functions/connectDb');
+const { connect } = require('../../functions/connectDb');
 
 
 const adminsList = async () => {
@@ -44,7 +44,7 @@ const adminsList = async () => {
         }
     }
 }
-adminsList();
+// adminsList();
 
 
 

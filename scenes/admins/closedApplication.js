@@ -4,7 +4,7 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
-const { connect } = require('../functions/connectDb');
+const { connect } = require('../../functions/connectDb');
 
 
 
@@ -34,21 +34,20 @@ const closedIdApplication = new Composer()
 closedIdApplication.on("text", async (ctx) => {
 
     try {
+        const db = await connect()
+        const applications = db.collection("applications");
+        const customer = db.collection("customer");
+        const executors = db.collection("executors");
 
         ctx.wizard.state.data.idApplication = ctx.message.text
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
+        let findApplicationID = await applications.findOne({ id: parseInt(wizardData.idApplication) })
 
-        let findApplicationID = readFileParse.find(readFileParse => readFileParse.id == wizardData.idApplication)
+        let executorID = await executors.findOne({ id: parseInt(wizardData.userId) })
+        console.log(executorID);
 
-        let executorFile = fs.readFileSync('./db/executors.json', 'utf-8')
-        let executorFileParse = JSON.parse(executorFile)
-
-        let executorID = executorFileParse.find(executorFileParse => executorFileParse.id == wizardData.userId)
-
-        if (findApplicationID == undefined) {
+        if (findApplicationID == null) {
             await ctx.reply("Заявка не найдена", Markup.removeKeyboard());
             return ctx.scene.leave()
         }
@@ -79,22 +78,30 @@ closedIdApplication.on("text", async (ctx) => {
             let minutes = currentDate.getMinutes()
 
 
-            findApplicationID.open = false;
-            findApplicationID.closed.day = dd;
-            findApplicationID.closed.month = mm;
-            findApplicationID.closed.year = yyyy;
-            findApplicationID.closed.hours = hours;
-            findApplicationID.closed.minutes = minutes;
-            findApplicationID.closed.date = currentDate.toISOString()
+            applications.updateOne(
+                { id: parseInt(wizardData.idApplication) },
+                {
+                    $set: {
+                        open: false,
+                        closed: {
+                            day: dd,
+                            month: mm,
+                            year: yyyy,
+                            hours: hours,
+                            minutes: minutes,
+                            date: currentDate.toISOString(),
+
+                        }
+                    }
+                })
+
+            const findApplicationID = await applications.findOne({ id: parseInt(wizardData.idApplication) })
 
             await ctx.reply(`Вы закрыли заявку ID ${findApplicationID.id} от ${findApplicationID.customer.firstName} `);
-            await ctx.reply(`Заявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`,Markup.removeKeyboard());
+            await ctx.reply(`Заявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`, Markup.removeKeyboard());
 
             await botMessage.sendMessage(findApplicationID.customer.id, `Вашу заявку с ID ${findApplicationID.id} закрыл ${executorID.name} \nЗаявка закрыта ${findApplicationID.closed.day}.${findApplicationID.closed.month}.${findApplicationID.closed.year} в ${findApplicationID.closed.hours}:${findApplicationID.closed.minutes}`,
                 { disable_web_page_preview: true });
-
-            readFileStringify = JSON.stringify(readFileParse)
-            fs.writeFileSync('./db/applications.json', readFileStringify)
 
             return ctx.scene.leave()
         }

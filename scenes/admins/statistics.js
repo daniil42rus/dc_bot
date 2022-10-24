@@ -1,10 +1,6 @@
 const { Markup, Composer, Scenes } = require('telegraf')
-const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
-const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
-const { Console } = require('console');
-const { colours } = require('nodemon/lib/config/defaults');
 
 
 

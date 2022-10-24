@@ -9,24 +9,26 @@ const { pipeline } = require('node:stream');
 const { promisify } = require('node:util');
 
 
+//admins
+const takeApplicationScene = require("./scenes/admins/takeApplication")
+const closedApplicationScene = require("./scenes/admins/closedApplication")
+
+const myOpenApplicationScene = require("./scenes/admins/myOpenApplication")
+const myClosedMonthApplicationScene = require("./scenes/admins/myClosedMonthApplication")
+const allOpenApplicationScene = require("./scenes/admins/allOpenApplication")
+const sendApplicationScene = require("./scenes/admins/sendApplication")
+const sendStatisticsScene = require("./scenes/admins/statistics")
+const personOpenApplicationScene = require("./scenes/admins/personOpenApplication")
+const messageAllScene = require("./scenes/admins/massageAll")
+
+//users
+const applicationScene = require("./scenes/users/application")
+const customerOpenApplicationScene = require("./scenes/users/customerOpenApplication")
 
 
-
-const applicationScene = require("./scenes/application.js")
-const takeApplicationScene = require("./scenes/takeApplication.js")
-const closedApplicationScene = require("./scenes/closedApplication.js")
-const myOpenApplicationScene = require("./scenes/myOpenApplication.js")
-const myClosedMonthApplicationScene = require("./scenes/myClosedMonthApplication.js")
-const allOpenApplicationScene = require("./scenes/allOpenApplication.js")
-const sendApplicationScene = require("./scenes/sendApplication.js")
-const sendStatisticsScene = require("./scenes/statistics.js")
-const personOpenApplicationScene = require("./scenes/personOpenApplication.js")
-const messageAllScene = require("./scenes/massageAll.js")
-const customerOpenApplicationScene = require("./scenes/customerOpenApplication.js")
 
 const stage = new Scenes.Stage(
     [
-        applicationScene,
         takeApplicationScene,
         closedApplicationScene,
         myOpenApplicationScene,
@@ -36,6 +38,7 @@ const stage = new Scenes.Stage(
         sendStatisticsScene,
         personOpenApplicationScene,
         messageAllScene,
+        applicationScene,
         customerOpenApplicationScene,
     ])
 

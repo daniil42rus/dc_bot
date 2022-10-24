@@ -4,10 +4,14 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fs = require('fs');
 const { Console } = require('console');
+const { connect } = require('../../functions/connectDb');
+
 
 const customerOpenApplication = new Composer()
 customerOpenApplication.on("text", async (ctx) => {
     try {
+        const db = await connect()
+        const applications = db.collection("applications");
 
         ctx.wizard.state.data = {}
         ctx.wizard.state.data.id = ctx.message.message_id
@@ -20,34 +24,30 @@ customerOpenApplication.on("text", async (ctx) => {
 
         const wizardData = ctx.wizard.state.data
 
-        let readFile = fs.readFileSync('./db/applications.json', 'utf-8')
-        let readFileParse = JSON.parse(readFile)
+        let readFileParse = await applications.find({ 'customer.id': parseInt(wizardData.userId) }).toArray()
+
+        let truereadFileParse = readFileParse.filter(obj => obj.open)
 
         let number = [];
 
-        for (i of readFileParse) {
-
-
-
-
-            let answer = (
-                `
-                ${i.application.department} 
-          Номер кабинета: ${i.application.roomNumber}       
-          Срочность:  ${i.application.urgency}       
-          Отправитель:  ${i.customer.firstName}      
-          В чем проблема:   ${i.application.problems}      
-          Описание:   ${i.application.problemsDetails} 
-          id заявки:  ${i.id}       
-          `);
-
-
-            !i.executor.name ? executorName = `Исполнитель : не назначен` : executorName = `Исполнитель:  ${i.executor.name} \n t.me/${i.executor.nickName}`;
-
-            if (i.open && wizardData.userId == i.customer.id) {
+        for (i of truereadFileParse) {
+            
+                let answer = (
+                    `
+                    ${i.application.department} 
+              Номер кабинета: ${i.application.roomNumber}       
+              Срочность:  ${i.application.urgency}       
+              Отправитель:  ${i.customer.firstName}      
+              В чем проблема:   ${i.application.problems}      
+              Описание:   ${i.application.problemsDetails} 
+              id заявки:  ${i.id}      
+              Исполнитель: ${!i.executor.name ? 'не назначен' : i.executor.name + ' - t.me/' + i.executor.nickName}
+              `);
+              
                 number.push(i.id)
-                await ctx.reply(`${answer} ${executorName} `);
-            }
+                await ctx.reply(answer, {
+                    disable_web_page_preview: true
+                });
         }
 
         await ctx.reply(`Всего ${number.length} шт.`, Markup.removeKeyboard());
