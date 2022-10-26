@@ -4,14 +4,14 @@ require('dotenv').config();
 const botMessage = new TelegramBot(process.env.BOT_TOKEN);
 const fetch = require('node-fetch');
 
-const express = require("express");
-const multer = require("multer");
+const { createWriteStream } = require('node:fs');
+const { pipeline } = require('node:stream');
+const { promisify } = require('node:util');
 
 const fs = require('fs');
 const { Console } = require('console');
 
 const { connect } = require('../../functions/connectDb');
-
 
 const adminsList = async () => {
     const db = await connect()
@@ -46,9 +46,6 @@ const adminsList = async () => {
 }
 // adminsList();
 
-
-
-
 const department = new Composer()
 department.on("text", async (ctx) => {
     try {
@@ -76,16 +73,6 @@ department.on("text", async (ctx) => {
 })
 
 const problems = new Composer()
-// problems.hears('Отмена заявки', async (ctx) => {
-//     try {
-//         await ctx.reply('Вы отменили заявку', Markup.removeKeyboard())
-//         return ctx.scene.leave()
-//     } catch (e) {
-//         console.error(e)
-//     }
-
-// })
-
 problems.on("text", async (ctx) => {
     try {
         ctx.wizard.state.data.title = ctx.message.text
@@ -291,35 +278,19 @@ urgency.on('photo', async (ctx) => {
     try {
         ctx.wizard.state.data.problemsDetails = ctx.message.text
 
-
-
         let file_id = ctx.message.photo[ctx.message.photo.length - 1]?.file_id;
         console.log(file_id);
-        const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${file_id}`);
+        const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${file_id}`)
         const body = await response.json()
         const fileLink = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${body.result.file_path}`
-        // const file_path = body.result.file_path;
-        // const urljpg = await fetch(`https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file_path}`);
 
         ctx.wizard.state.data.problemsDetailsPhoto = fileLink
+        ctx.wizard.state.data.problemsDetailsPhotoLinkLocal = body.result.file_path
 
-
-
-
-
-        function saveImg(blob) {
-            let link = document.createElement("a");
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", `${Date.now()}`);
-            link.click();
-        }
-
-        fetch(fileLink)
-            .then(response_object => response_object.blob())
-            .then(blob_object => saveImg(blob_object))
-
-
-
+        const streamPipeline = promisify(pipeline);
+        const responsePNG = await fetch(fileLink);
+        if (!responsePNG.ok) throw new Error(`unexpected response ${responsePNG.statusText}`);
+        await streamPipeline(responsePNG.body, createWriteStream(`./uploads/${body.result.file_path}`));
 
         ctx.reply(fileLink)
 
@@ -336,10 +307,6 @@ urgency.on('photo', async (ctx) => {
         console.error(e)
     }
 })
-
-
-
-
 
 urgency.on("text", async (ctx) => {
     try {
@@ -360,9 +327,7 @@ urgency.on("text", async (ctx) => {
 
 
 
-
 const roomNumber = new Composer()
-
 roomNumber.on("text", async (ctx) => {
     try {
 
@@ -398,9 +363,6 @@ roomNumber.on("text", async (ctx) => {
             ]
             ).oneTime().resize())
         }
-
-
-
         return ctx.wizard.next()
 
     } catch (e) {
@@ -435,29 +397,30 @@ conditionStep.on("text", async (ctx) => {
         const customer = db.collection("customer");
 
         const applicationsArr = await applications.find().toArray();
- 
+
         let nubberID = parseInt(applicationsArr[applicationsArr.length - 1].id + 1)
 
+        // let answer = (
+        //     `
+        //         ${wizardData.title} 
+        //   Номер кабинета: ${wizardData.roomNumber}       
+        //   Срочность:  ${wizardData.urgency}       
+        //   Отправитель:  ${wizardData.firstName}      
+        //   В чем проблема:   ${wizardData.problems}
+        //   Описание: ${wizardData.problemsDetails ? wizardData.problemsDetails : 'Фото'}
+        //   id заявки:  ${nubberID}       
+        //     `);
 
         let answer = (
-            `
-            ${wizardData.title} 
-      Номер кабинета: ${wizardData.roomNumber}       
-      Срочность:  ${wizardData.urgency}       
-      Отправитель:  ${wizardData.firstName}      
-      В чем проблема:   ${wizardData.problems}      
-      Описание:   ${wizardData.problemsDetails} 
-      PhotoLink:   ${wizardData.problemsDetailsPhoto} 
+            `${wizardData.title}\nНомер кабинета: ${wizardData.roomNumber}\nСрочность: ${wizardData.urgency}\nОтправитель: ${wizardData.firstName}\nВ чем проблема: ${wizardData.problems}\nОписание: ${wizardData.problemsDetails ? wizardData.problemsDetails : 'Фото'}\nid заявки: ${nubberID}\n`);
 
-      id заявки:  ${nubberID}       
-        `);
 
         let answerAdmin = (
             `t.me/${wizardData.userName}
             tg://user?id=${wizardData.userId}`
         );
 
-        answerJSON = {
+        let answerJSON = {
             id: nubberID,
 
             open: true,
@@ -467,7 +430,8 @@ conditionStep.on("text", async (ctx) => {
                 roomNumber: wizardData.roomNumber,
                 problems: wizardData.problems,
                 problemsDetails: wizardData.problemsDetails,
-                PhotoLink: wizardData.problemsDetailsPhoto,
+                PhotoLinkTelegramm: wizardData.problemsDetailsPhoto ? `${wizardData.problemsDetailsPhoto}` : false,
+                PhotoLinkLocal: wizardData.problemsDetailsPhotoLinkLocal ? `./uploads/${wizardData.problemsDetailsPhotoLinkLocal}` : false,
 
                 urgency: wizardData.urgency,
             },
@@ -518,7 +482,7 @@ conditionStep.on("text", async (ctx) => {
             console.log('Admins undefined');
             throw new Error("Нет соединения");
         } else {
-            
+
             //положить заявку в БД
 
             await applications.insertOne(answerJSON);
@@ -536,6 +500,9 @@ conditionStep.on("text", async (ctx) => {
         await ctx.reply(answer, Markup.removeKeyboard(), {
             disable_web_page_preview: true
         });
+
+
+        await ctx.replyWithPhoto({ source: `./uploads/${wizardData.problemsDetailsPhotoLinkLocal}` });
 
         return ctx.scene.leave()
     } catch (e) {

@@ -202,7 +202,7 @@ bot.on('photo', async (ctx) => {
 
 
 
-    console.log('Сообщение', ctx.message, body.result.file_path , ctx.chat, date.toLocaleString())
+    console.log('Сообщение', ctx.message, body.result.file_path, ctx.chat, date.toLocaleString())
     if (ctx.chat.type == 'private') {
         ctx.reply(fileLink, Markup.removeKeyboard())
     }
